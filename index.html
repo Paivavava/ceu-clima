@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#071426" />
+  <meta name="description" content="Céu — previsão do tempo elegante, com condições atuais, próximas 24 horas e os próximos 7 dias para qualquer cidade do mundo." />
+  <title>Céu · Previsão do tempo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ffd08a'/%3E%3Cstop offset='1' stop-color='%237cc4ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%230b1830'/%3E%3Ccircle cx='26' cy='26' r='9' fill='url(%23g)'/%3E%3Cpath d='M21 47h25a8 8 0 0 0 .8-16 12 12 0 0 0-22.6-2A9 9 0 0 0 21 47Z' fill='%23eaf4ff'/%3E%3C/svg%3E" />
+</head>
+<body data-weather="clear" data-day="true">
+
+  <!-- ============ Fundo animado ============ -->
+  <div class="sky" aria-hidden="true">
+    <div class="sky__gradient"></div>
+    <div class="sky__haze"></div>
+    <div class="sky__stars" id="stars"></div>
+    <div class="orb orb--sun" id="orb-sun"></div>
+    <div class="orb orb--moon" id="orb-moon"></div>
+    <div class="clouds">
+      <span class="cloud cloud--1"></span>
+      <span class="cloud cloud--2"></span>
+      <span class="cloud cloud--3"></span>
+      <span class="cloud cloud--4"></span>
+    </div>
+    <div class="rain" id="rain"></div>
+    <div class="snow" id="snow"></div>
+    <div class="flash" id="flash"></div>
+    <div class="grain"></div>
+  </div>
+
+  <div class="app">
+
+    <!-- ============ Topo ============ -->
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Céu, início">
+        <span class="brand__mark">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="26" cy="25" r="9" fill="var(--icon-sun)" />
+            <path d="M20 48h25.5a8.5 8.5 0 0 0 .9-16.9 12 12 0 0 0-22.7-2A9.2 9.2 0 0 0 20 48Z" fill="#eaf4ff" />
+          </svg>
+        </span>
+        <span class="brand__text">
+          <strong>Céu</strong>
+          <span>clima ao vivo</span>
+        </span>
+      </a>
+
+      <form class="search" id="search-form" role="search" autocomplete="off" novalidate>
+        <div class="search__field">
+          <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="m16 16 4.5 4.5" />
+          </svg>
+          <input
+            id="search-input"
+            class="search__input"
+            type="text"
+            name="city"
+            placeholder="Buscar cidade…"
+            aria-label="Nome da cidade"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-controls="search-results"
+            aria-expanded="false"
+            spellcheck="false"
+            maxlength="80"
+          />
+          <button type="button" class="icon-btn geo-btn" id="geo-btn" title="Usar minha localização" aria-label="Usar minha localização">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="3.2" />
+              <circle cx="12" cy="12" r="7.5" />
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+            </svg>
+          </button>
+          <button type="submit" class="search__submit" aria-label="Buscar">
+            <span>Buscar</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6.5 18.5 12 13 17.5" /></svg>
+          </button>
+        </div>
+
+        <div class="search__results" id="search-results" role="listbox" aria-label="Sugestões de cidades" hidden></div>
+        <p class="search__hint" id="search-hint" aria-live="polite"></p>
+      </form>
+
+      <div class="unit-toggle" role="group" aria-label="Unidade de temperatura">
+        <button type="button" data-unit="c" class="is-active" aria-pressed="true" title="Celsius · vento em km/h">°C</button>
+        <button type="button" data-unit="f" aria-pressed="false" title="Fahrenheit · vento em mph">°F</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ============ Clima atual ============ -->
+      <section class="hero" aria-labelledby="place-name">
+        <article class="card now">
+          <header class="now__head">
+            <div class="now__place">
+              <svg class="now__pin" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 21s6.5-5.6 6.5-10.5a6.5 6.5 0 1 0-13 0C5.5 15.4 12 21 12 21Z" />
+                <circle cx="12" cy="10.5" r="2.4" />
+              </svg>
+              <div class="now__titles">
+                <h1 id="place-name">Carregando…</h1>
+                <p id="place-region">—</p>
+              </div>
+              <button type="button" class="icon-btn refresh" id="refresh-btn" title="Atualizar" aria-label="Atualizar previsão">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20 11.5a8 8 0 1 0-.9 4.4" />
+                  <path d="M20 4.5v7h-7" />
+                </svg>
+              </button>
+            </div>
+            <span class="aqi" id="aqi" hidden></span>
+          </header>
+
+          <div class="now__body">
+            <div class="now__visual">
+              <div class="weather-icon weather-icon--hero" id="now-icon" aria-hidden="true"></div>
+            </div>
+
+            <div class="now__temp">
+              <span class="now__value" id="now-temp">--</span>
+              <span class="now__unit" aria-hidden="true">°</span>
+            </div>
+
+            <div class="now__meta">
+              <p class="now__desc" id="now-desc">Buscando condições…</p>
+              <p class="now__range">
+                <span class="range-arrow" aria-hidden="true">↑</span>
+                <span id="now-high">--°</span>
+                <span class="range-arrow range-arrow--low" aria-hidden="true">↓</span>
+                <span id="now-low">--°</span>
+              </p>
+              <p class="now__feels" id="now-feels">Sensação térmica de --°</p>
+            </div>
+          </div>
+
+          <footer class="now__foot">
+            <span class="pulse" aria-hidden="true"></span>
+            <span id="now-updated" aria-live="polite">Obtendo dados…</span>
+            <span class="now__dot">·</span>
+            <span id="now-tz">—</span>
+            <span class="now__credit">Open-Meteo</span>
+          </footer>
+        </article>
+
+        <!-- ============ Detalhes ============ -->
+        <aside class="details" id="details" aria-label="Detalhes das condições"></aside>
+      </section>
+
+      <!-- ============ Próximas horas ============ -->
+      <section class="card panel reveal" style="--i:1" aria-labelledby="hourly-title">
+        <header class="panel__head">
+          <div>
+            <h2 id="hourly-title">Próximas 24 horas</h2>
+            <p class="panel__sub">Temperatura hora a hora na sua cidade</p>
+          </div>
+          <div class="panel__tools">
+            <span class="panel__badge" id="hourly-badge">—</span>
+            <div class="panel__nav">
+              <button type="button" class="icon-btn panel__nav-btn" id="hour-prev" aria-label="Ver horas anteriores">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" /></svg>
+              </button>
+              <button type="button" class="icon-btn panel__nav-btn" id="hour-next" aria-label="Ver próximas horas">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5" /></svg>
+              </button>
+            </div>
+          </div>
+        </header>
+        <div class="hourly" id="hourly" tabindex="0" role="region" aria-label="Previsão hora a hora"></div>
+      </section>
+
+      <!-- ============ Próximos dias ============ -->
+      <section class="card panel reveal" style="--i:2" aria-labelledby="daily-title">
+        <header class="panel__head">
+          <div>
+            <h2 id="daily-title">Próximos 7 dias</h2>
+            <p class="panel__sub">Máximas, mínimas e chance de chuva</p>
+          </div>
+          <span class="panel__badge" id="daily-badge">—</span>
+        </header>
+        <div class="daily" id="daily"></div>
+      </section>
+    </main>
+
+    <footer class="page-foot">
+      <p>
+        Feito com HTML, CSS e JavaScript puro · Dados de
+        <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a>
+        e <a href="https://open-meteo.com/en/docs/geocoding-api" target="_blank" rel="noopener noreferrer">geocodificação</a>.
+      </p>
+      <p class="page-foot__small">Previsões têm caráter informativo. Aproveite o céu.</p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
